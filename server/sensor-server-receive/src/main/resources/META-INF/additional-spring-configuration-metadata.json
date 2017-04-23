@@ -1,0 +1,7 @@
+{"properties": [
+  {
+    "name": "sensor.server.activemq.topic.name",
+    "type": "java.lang.String",
+    "description": "ActiveMQ topic to which to send the received data'"
+  }
+]}
