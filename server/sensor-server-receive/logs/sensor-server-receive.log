@@ -293,3 +293,9 @@
 2017-04-23 21:26:17.021  INFO 28823 --- [http-nio-8080-exec-1] s.s.r.w.rest.RestReceiveDataController   : 0:0:0:0:0:0:0:1 - null - Received measurements [DeviceMeasurements(deviceId=1zc, measurements=[Measurement(type=TEMPERATURE, value=1.0, timing=2007-12-03T10:15:30), Measurement(type=TEMPERATURE, value=2.0, timing=2007-12-03T10:15:31)]), DeviceMeasurements(deviceId=1zb, measurements=[Measurement(type=TEMPERATURE, value=1.02, timing=2007-12-04T10:15:30)])]
 2017-04-23 21:26:17.021  INFO 28823 --- [http-nio-8080-exec-1] s.s.r.s.a.ReceivedDataToActiveMqService  : Publish measurements to active mq
 2017-04-23 21:26:17.022 DEBUG 28823 --- [http-nio-8080-exec-1] s.s.r.s.a.ReceivedDataToActiveMqService  : Active MQ topic topic://sensor.server.receive
+2017-04-23 21:41:17.344  INFO 28823 --- [RMI TCP Connection(23)-127.0.0.1] inMXBeanRegistrar$SpringApplicationAdmin : Application shutdown requested.
+2017-04-23 21:41:17.345  INFO 28823 --- [RMI TCP Connection(23)-127.0.0.1] ationConfigEmbeddedWebApplicationContext : Closing org.springframework.boot.context.embedded.AnnotationConfigEmbeddedWebApplicationContext@12d3a4e9: startup date [Sun Apr 23 21:26:04 CEST 2017]; root of context hierarchy
+2017-04-23 21:41:17.346  INFO 28823 --- [RMI TCP Connection(23)-127.0.0.1] o.s.c.support.DefaultLifecycleProcessor  : Stopping beans in phase 2147483647
+2017-04-23 21:41:17.346  INFO 28823 --- [RMI TCP Connection(23)-127.0.0.1] o.s.c.support.DefaultLifecycleProcessor  : Stopping beans in phase -2147482648
+2017-04-23 21:41:17.348  INFO 28823 --- [RMI TCP Connection(23)-127.0.0.1] o.s.j.e.a.AnnotationMBeanExporter        : Unregistering JMX-exposed beans on shutdown
+2017-04-23 21:41:17.348  INFO 28823 --- [RMI TCP Connection(23)-127.0.0.1] o.s.j.e.a.AnnotationMBeanExporter        : Unregistering JMX-exposed beans
