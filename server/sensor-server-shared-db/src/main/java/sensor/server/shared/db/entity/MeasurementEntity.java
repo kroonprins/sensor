@@ -7,6 +7,7 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
 import lombok.Data;
@@ -37,10 +38,15 @@ public class MeasurementEntity {
 	private @NonNull LocalDateTime timing;
 
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)
+	@JoinColumn(name = "deviceId")
 	private @NonNull DeviceEntity device;
 
 	public static MeasurementEntity of(Measurement measurement, DeviceEntity device) {
 		return new MeasurementEntity(measurement.getType(), measurement.getValue(), measurement.getTiming(), device);
+	}
+
+	public Measurement toMeasurement() {
+		return Measurement.builder().type(this.getType()).value(this.getValue()).timing(this.getTiming()).build();
 	}
 
 }

@@ -9,7 +9,7 @@ public interface DeviceDbService extends CrudRepository<DeviceEntity, Integer> {
 
 	public DeviceEntity readByFullUniqueIdentifier(String fullUniqueIdentifier);
 
-	@Query("select e.id from DeviceEntity e where fullUniqueIdentifier = ?1")
+	@Query("select e.id from DeviceEntity e where e.fullUniqueIdentifier = ?1")
 	public Integer readIdForFullUniqueIdentifier(String fullUniqueIdentifier);
 
 }
