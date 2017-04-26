@@ -1,0 +1,16 @@
+{
+  "name": "sensor-server-web",
+  "appPath": "src/main/resources/static",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "libs",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "angular": "^1.6.4",
+    "bootstrap": "^3.3.7",
+    "angular-route": "^1.6.4"
+  }
+}
