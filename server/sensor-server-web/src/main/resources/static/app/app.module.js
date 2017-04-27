@@ -3,7 +3,8 @@
 
     angular
         .module('sensorApp', [
-            'ngRoute'
+            'ngRoute',
+            'chart.js'
         ])
         .config(['$routeProvider',
             function ($routeProvider) {

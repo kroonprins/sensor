@@ -1,9 +1,6 @@
 <div ng-cloak>
     <div class="row">
-        Yo!
-        {{vm.message}}
-        <ul>
-            <li ng-repeat="measurement in vm.sensorData">{{measurement.value}} - {{measurement.timing}}</li>
-        </ul>
+        <canvas id="line" class="chart chart-line" chart-data="vm.data" chart-labels="vm.labels" chart-series="vm.series" chart-options="vm.options"
+        />
     </div>
 </div>

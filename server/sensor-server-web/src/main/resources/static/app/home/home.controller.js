@@ -1,4 +1,4 @@
-(function() {
+(function () {
     'use strict';
 
     angular
@@ -7,13 +7,42 @@
 
     HomeController.$inject = ['$scope', 'SensorService'];
 
-    function HomeController ($scope, SensorService) {
+    function HomeController($scope, SensorService) {
         var vm = this;
 
-        vm.message = "Yo Yo Yo Yo";
+        const TYPE = "TEMPERATURE";
 
-        SensorService.byDevice('1zc', 'TEMPERATURE').then(function(data) {
+        SensorService.byDevice('1zc', TYPE).then(function (data) {
             vm.sensorData = data;
+            vm.labels=[];
+            var data1 = [];
+            angular.forEach(data, function (value) {
+                vm.labels.push(value.timing);
+                data1.push(value.value);
+            });
+
+            vm.data = [];
+            vm.data.push(data1);
         });
+
+
+        //vm.labels = ["January", "February", "March", "April", "May", "June", "July"];
+        vm.series = [TYPE];
+        /*vm.data = [
+            [65, 59, 80, 81, 56, 55, 40]
+        ];*/
+        //vm.datasetOverride = [{ yAxisID: 'y-axis-1' }];
+        vm.options = {
+            /*scales: {
+                yAxes: [
+                    {
+                        id: 'y-axis-1',
+                        type: 'linear',
+                        display: true,
+                        position: 'left'
+                    }
+                ]
+            }*/
+        };
     }
 })();
