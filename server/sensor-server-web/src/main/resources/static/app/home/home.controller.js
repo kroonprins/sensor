@@ -5,16 +5,16 @@
         .module('sensorApp')
         .controller('HomeController', HomeController);
 
-    HomeController.$inject = ['$scope', 'SensorService'];
+    HomeController.$inject = ['$scope', 'SensorService', '$mdDialog'];
 
-    function HomeController($scope, SensorService) {
+    function HomeController($scope, SensorService, $mdDialog) {
         var vm = this;
 
         const TYPE = "TEMPERATURE";
 
         SensorService.byDevice('1zc', TYPE).then(function (data) {
             vm.sensorData = data;
-            vm.labels=[];
+            vm.labels = [];
             var data1 = [];
             angular.forEach(data, function (value) {
                 vm.labels.push(value.timing);
@@ -24,6 +24,11 @@
             vm.data = [];
             vm.data.push(data1);
         });
+
+        vm.showDialog = function ($event) {
+            var dialog = $mdDialog.confirm().title("Yo?").textContent("Yo? Yo? Yo?").targetEvent($event).ok("Yup").cancel("Nyo");
+            $mdDialog.show(dialog);
+        }
 
 
         //vm.labels = ["January", "February", "March", "April", "May", "June", "July"];

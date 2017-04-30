@@ -10,6 +10,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import javax.persistence.OrderBy;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -36,6 +37,7 @@ public class DeviceEntity {
 	private @NonNull String fullUniqueIdentifier;
 
 	@OneToMany(mappedBy = "device", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+	@OrderBy("type,timing")
 	private List<MeasurementEntity> measurements;
 
 	public static DeviceEntity of(String fullUniqueIdentifier) {

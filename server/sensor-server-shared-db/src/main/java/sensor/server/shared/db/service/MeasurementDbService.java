@@ -10,6 +10,6 @@ import sensor.server.shared.model.MeasurementType;
 
 public interface MeasurementDbService extends CrudRepository<MeasurementEntity, Integer> {
 
-	@Query("select m from MeasurementEntity m inner join m.device d where d.fullUniqueIdentifier = ?1 and m.type in (?2)")
+	@Query("select m from MeasurementEntity m inner join m.device d where d.fullUniqueIdentifier = ?1 and m.type in (?2) order by type,timing")
 	public List<MeasurementEntity> listByDeviceId(String deviceId, List<MeasurementType> typeFilter);
 }

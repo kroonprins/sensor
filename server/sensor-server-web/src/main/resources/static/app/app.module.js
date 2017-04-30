@@ -4,6 +4,7 @@
     angular
         .module('sensorApp', [
             'ngRoute',
+            'ngMaterial',
             'chart.js'
         ])
         .config(['$routeProvider',
