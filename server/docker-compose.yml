@@ -1,0 +1,48 @@
+version: '3'
+services:
+  sensor-server-receive:
+    build: ./sensor-server-receive
+    image: sensor-server-receive
+    container_name: sensor-server-receive
+#TODO why not working?
+#    ports:
+#      - "80:8080"
+    links:
+      - sensor-server-queue
+  sensor-server-process:
+    build: ./sensor-server-process
+    image: sensor-server-process
+    container_name: sensor-server-process
+    links:
+      - sensor-server-queue
+      - sensor-server-db
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://sensor-server-db/sensor_data
+      SPRING_DATASOURCE_USERNAME: mysql
+      SPRING_DATASOURCE_PASSWORD: mysql
+  sensor-server-web:
+    build: ./sensor-server-web
+    image: sensor-server-web
+    container_name: sensor-server-web
+    links:
+      - sensor-server-db
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://sensor-server-db/sensor_data
+      SPRING_DATASOURCE_USERNAME: mysql
+      SPRING_DATASOURCE_PASSWORD: mysql
+  sensor-server-db:
+    image: mysql:8
+    container_name: sensor-server-db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: sensor_data
+      MYSQL_USER: mysql
+      MYSQL_PASSWORD: mysql
+  sensor-server-queue:
+    image: rmohr/activemq:5.14.3-alpine
+    container_name: sensor-server-queue
+    ports:
+      # gives access to admin console of activemq
+      - "8161:8161"
+    expose:
+      - "61616"
