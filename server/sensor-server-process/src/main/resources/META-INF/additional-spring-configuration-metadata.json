@@ -1,19 +1,17 @@
-{
-	"properties": [
-		{
-			"name": "sensor.server.activemq.topic.name",
-			"type": "java.lang.String",
-			"description": "ActiveMQ topic to which the received data has been sent for processing'"
-		},
-		{
-			"name": "sensor.server.activemq.topic.clientid",
-			"type": "java.lang.String",
-			"description": "A description for 'sensor.server.activemq.topic.clientid'"
-		},
-		{
-			"name": "sensor.server.activemq.topic.subscription",
-			"type": "java.lang.String",
-			"description": "A description for 'sensor.server.activemq.topic.subscription'"
-		}
-	]
-}
+{"properties": [
+  {
+    "name": "sensor.server.activemq.topic.name",
+    "type": "java.lang.String",
+    "description": "ActiveMQ topic to which the received data has been sent for processing'"
+  },
+  {
+    "name": "sensor.server.activemq.topic.clientid",
+    "type": "java.lang.String",
+    "description": "A description for 'sensor.server.activemq.topic.clientid'"
+  },
+  {
+    "name": "sensor.server.activemq.topic.subscription",
+    "type": "java.lang.String",
+    "description": "A description for 'sensor.server.activemq.topic.subscription'"
+  }
+]}

@@ -1,0 +1,23 @@
+---
+
+logging:
+  level:
+    sensor: INFO
+  file: /var/log/sensor-server-web.log
+
+server:
+  port: 8081 
+        
+---
+
+spring: 
+  profiles: dev
+  datasource:
+    url: jdbc:mysql://172.17.0.3:3306/sensor_data
+    username: mysql
+    password: mysql
+    
+logging:
+  level:
+    sensor: DEBUG
+  file: logs/sensor-server-web.log    

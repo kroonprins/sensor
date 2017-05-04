@@ -1,6 +1,6 @@
 FROM openjdk:8-jre-alpine
 
-VOLUME /tmp
+VOLUME /tmp /var/log
 ADD target/sensor-server-receive-0.0.1-SNAPSHOT.jar app.jar
 RUN sh -c 'touch /app.jar'
 ENV JAVA_OPTS=""

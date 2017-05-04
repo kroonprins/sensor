@@ -10,6 +10,11 @@
 	<name>sensor-server-shared</name>
 	<description>Shared classes for use the spring boot applications</description>
 
+	<properties>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
+	</properties>
+
 	<dependencies>
 		<dependency>
 			<groupId>org.projectlombok</groupId>

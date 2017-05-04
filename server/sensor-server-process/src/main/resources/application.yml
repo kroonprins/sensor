@@ -1,0 +1,48 @@
+---
+
+logging:
+  level:
+    sensor: INFO
+  file: /var/log/sensor-server-process.log
+        
+spring:
+  jms:
+    pub-sub-domain: true
+  activemq:
+    broker-url: tcp://sensor-server-queue:61616
+    user: admin
+    password: admin
+    packages:
+      trusted:
+      - sensor.server.shared
+      - java.time
+      - java.lang
+      - java.util
+  jpa:
+    hibernate:
+      # TODO temporary
+      ddl-auto: create
+
+sensor:
+  server:
+    activemq:
+      topic:
+        name: sensor.server.receive
+        clientid: data_process_client_id
+        subscription: data_process_subscription     
+        
+---
+
+spring: 
+  profiles: dev
+  activemq:
+    broker-url: tcp://172.17.0.2:61616
+  datasource:
+    url: jdbc:mysql://172.17.0.3:3306/sensor_data
+    username: mysql
+    password: mysql
+    
+logging:
+  level:
+    sensor: DEBUG
+  file: logs/sensor-server-process.log    

@@ -7,6 +7,8 @@ services:
 #TODO why not working?
 #    ports:
 #      - "80:8080"
+    volumes:
+      - ./logs/sensor-server-receive:/var/log
     links:
       - sensor-server-queue
   sensor-server-process:
@@ -16,6 +18,8 @@ services:
     links:
       - sensor-server-queue
       - sensor-server-db
+    volumes:
+      - ./logs/sensor-server-process:/var/log
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://sensor-server-db/sensor_data
       SPRING_DATASOURCE_USERNAME: mysql
@@ -26,6 +30,8 @@ services:
     container_name: sensor-server-web
     links:
       - sensor-server-db
+    volumes:
+      - ./logs/sensor-server-web:/var/log
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://sensor-server-db/sensor_data
       SPRING_DATASOURCE_USERNAME: mysql

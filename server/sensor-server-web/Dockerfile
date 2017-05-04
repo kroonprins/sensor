@@ -1,7 +1,7 @@
 FROM openjdk:8-jre-alpine
 
 EXPOSE 8081
-VOLUME /tmp
+VOLUME /tmp /var/log
 ADD target/sensor-server-web-0.0.1-SNAPSHOT.jar app.jar
 RUN sh -c 'touch /app.jar'
 ENV JAVA_OPTS=""
