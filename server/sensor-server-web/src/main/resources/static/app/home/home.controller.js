@@ -21,8 +21,7 @@
                 data1.push(value.value);
             });
 
-            vm.data = [];
-            vm.data.push(data1);
+            vm.data = [ data1 ];
         });
 
         vm.showDialog = function ($event) {

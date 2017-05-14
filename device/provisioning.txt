@@ -1,0 +1,39 @@
+change pi password (+make specific user)
+
+get sources from git:
+  * paho
+  * server
+
+install sqlite: sudo apt-get install sqlite3 
+
+create empty database if not exists?
+
+install mosquitto: 
+  * wget http://repo.mosquitto.org/debian/mosquitto-repo.gpg.key
+  * sudo apt-key add mosquitto-repo.gpg.key 
+  * cd /etc/apt/sources.list.d/
+  * sudo wget http://repo.mosquitto.org/debian/mosquitto-wheezy.list
+  * sudo apt-get update 
+  * sudo apt-get install mosquitto 
+
+install temperature sensor library: sudo apt-get install python-w1thermsensor
+
+install paho python library:
+  * sudo apt-get install python-setuptools
+  * git clone https://github.com/eclipse/paho.mqtt.python.git => git not installed so currently uploading paho.mqtt.python.tar.g
+  * cd paho.mqtt.python
+  * sudo python setup.py install
+  * cd ..
+  * sudo rm -fr paho.mqtt.python
+
+AP:
+  * sudo apt-get install hostapd isc-dhcp-server
+  * https://learn.adafruit.com/setting-up-a-raspberry-pi-as-a-wifi-access-point/install-software
+  * met 1 correctie: https://unix.stackexchange.com/a/218695
+
+
+
+
+wit-grijs: achter-4 => midden
+zwart: voor-3 => links
+grijs-wit: achter-1 =>rechts

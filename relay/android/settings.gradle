@@ -1,0 +1,3 @@
+rootProject.name = 'Relay'
+
+include ':app'

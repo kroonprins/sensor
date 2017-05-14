@@ -26,7 +26,7 @@ client.on_message = on_message
 client.on_disconnect = on_disconnect
 
 try:
-    conn = sqlite3.connect('/home/pi/sqlite/test.db')
+    conn = sqlite3.connect('../sqlite/measurements.db')
     client.connect("localhost", 1883, 60)
     client.subscribe("paho/temperature", qos=1)
     client.loop_forever()
