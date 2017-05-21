@@ -72,12 +72,12 @@ class SubProcess(object):
         return result
 
 
-def start_processes(publisher_list):
-    """ Start all publishers and return the pids
+def start_processes(program_list):
+    """ Start all python programs and return the pids
     """
     processes = []
-    for publisher in publisher_list:
-        new_subprocess = SubProcess(publisher)
+    for program in program_list:
+        new_subprocess = SubProcess(program)
         processes.append(new_subprocess)
         print str(new_subprocess)+ " Started"
     return processes
