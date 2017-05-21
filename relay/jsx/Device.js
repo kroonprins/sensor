@@ -6,7 +6,7 @@ import {
 export const Device = (props) => {
   if(props.status) {
     return (
-      <Text>Device is connected: {props.device.id}</Text>
+      <Text>Device is connected: {props.device.id} ({props.device.count})</Text>
     );
   } else {
     return (

@@ -16,7 +16,15 @@ install mosquitto:
   * sudo apt-get update 
   * sudo apt-get install mosquitto 
 
-install temperature sensor library: sudo apt-get install python-w1thermsensor
+install temperature sensor library:
+  * sudo apt-get install python-w1thermsensor
+  * sudo modprobe w1-gpio && sudo modprobe w1_therm
+  * /etc/modules:
+      w1-gpio pullup=1
+      w1-therm
+  * /boot/config.txt:
+      # 1-wire settings
+      dtoverlay=w1-gpio
 
 install paho python library:
   * sudo apt-get install python-setuptools

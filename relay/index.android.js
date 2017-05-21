@@ -19,19 +19,26 @@ export default class RelayApp extends Component {
     connectedDevice: {}
   };
   _onPressButton = () => {
-    WifiStatusService.isConnected().then((isConnected) => {
+    WifiStatusService.isConnected().then(isConnected => {
       this.setState((prevState) => ({
         wifiConnected: isConnected
       }));
     });
-    DeviceService.isAvailable().then((deviceId) => {
-      if(deviceId !== '') {
+    DeviceService.isAvailable().then(deviceId => {
+      if (deviceId !== '') {
         this.setState((prevState) => ({
           deviceConnected: true,
           connectedDevice: {
             id: deviceId
           }
         }));
+        DeviceService.numberOfAvailableMeasurements().then(count => {
+          this.setState((prevState) => {
+            let updatedState = Object.assign({}, prevState);
+            updatedState.connectedDevice.count = count;
+            return updatedState;
+          });
+        });
       }
     });
   };
