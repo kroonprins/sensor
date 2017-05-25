@@ -1,12 +1,13 @@
-"""Serve measurements via HTTP reading from sqlite database
+""" Serve measurements via HTTP reading from sqlite database
 """
 
-import BaseHTTPServer
+import signal
 import json
 import sqlite3
 import traceback
-
-PORT = 8080
+import BaseHTTPServer
+from device_info import get_device_id
+from constants import WEB_SERVER_PORT, SQLITE_DATABASE
 
 class HttpHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     """ Handler for HTTP. Exposes services defined in the REQUEST_MAPPING.
@@ -46,7 +47,7 @@ class HttpHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         """ Return the number of measurements that have not yet been sent.
         """
         try:
-            cursor = DB_CONNECTION.cursor()
+            cursor = DATABASE_CONNECTION.cursor()
             cursor.execute("select count(*) from measurement where ifnull(status,'0') in ('0','2')")
             record = cursor.fetchone()
             if record is None:
@@ -55,7 +56,8 @@ class HttpHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 raise Exception("Emtpy record retrieved when counting the measurements")
             self.wfile.write(record[0])
         except Exception:
-            print self.date_time_string()+" - An error occurred retrieving the number of measurements..."
+            print self.date_time_string()+" - An error occurred retrieving \
+                                                   the number of measurements..."
             traceback.print_exc()
 
     def send_measurements(self):
@@ -65,7 +67,7 @@ class HttpHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         body = json.loads(self.rfile.read(content_len))
 
         try:
-            cursor = DB_CONNECTION.cursor()
+            cursor = DATABASE_CONNECTION.cursor()
 
             limit_by_type = 'type' in body
 
@@ -74,26 +76,29 @@ class HttpHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             else:
                 params = ()
 
-            update_initial_status_query = "update measurement set status='2' where trim(status) is null"
+            update_initial_status_query = "update measurement set status='2' \
+                                                     where trim(status) is null"
             if limit_by_type:
                 update_initial_status_query += " and type=?"
             cursor.execute(update_initial_status_query, params)
 
-            DB_CONNECTION.commit()
+            DATABASE_CONNECTION.commit()
 
-            select_query = "select type||'#'||timing||'#'||value||'$' from measurement where status='2'"
+            select_query = "select type||'#'||timing||'#'||value||'$' from measurement \
+                                                     where status='2'"
             if limit_by_type:
                 select_query += " and type=?"
             for measurement in cursor.execute(select_query, params):
                 self.wfile.write(measurement[0])
             self.wfile.flush()
 
-            update_final_status_query = "update measurement set status='5' where status='2'"
+            update_final_status_query = "update measurement set status='5' \
+                                                     where status='2'"
             if limit_by_type:
                 update_final_status_query += " and type=?"
             cursor.execute(update_final_status_query, params)
 
-            DB_CONNECTION.commit()
+            DATABASE_CONNECTION.commit()
 
         except Exception:
             # this means that if an exception occurs somewhere during
@@ -101,7 +106,7 @@ class HttpHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             # on next request.
             print self.date_time_string()+" - An error occurred sending the measurements..."
             traceback.print_exc()
-            DB_CONNECTION.rollback()
+            DATABASE_CONNECTION.rollback()
 
     REQUEST_MAPPING = {
         'GET': {
@@ -113,34 +118,25 @@ class HttpHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         }
     }
 
-def _get_device_id():
-    # Extract serial from cpuinfo file
-    cpuserial = "0000000000000000"
-    try:
-        cpuinfo = open('/proc/cpuinfo', 'r')
-        for line in cpuinfo:
-            if line[0:6] == 'Serial':
-                cpuserial = line[10:26]
-        cpuinfo.close()
-    except Exception:
-        cpuserial = "ERROR000000000"
-
-    return cpuserial
 
 if __name__ == "__main__":
-    DEVICE_ID = _get_device_id()
 
-    SERVER = BaseHTTPServer.HTTPServer(("", PORT), HttpHandler)
+    def _end_program(signum, frame):
+        print "Exiting..."
+        DATABASE_CONNECTION.close()
+        SERVER.socket.close()
+        exit(0)
+
+    DEVICE_ID = get_device_id()
+
+    DATABASE_CONNECTION = sqlite3.connect(SQLITE_DATABASE)
+
+    SERVER = BaseHTTPServer.HTTPServer(("", WEB_SERVER_PORT), HttpHandler)
 
     print "Serving "+":".join(map(str, SERVER.server_address))+" for device: "+DEVICE_ID
 
-    try:
-        DB_CONNECTION = sqlite3.connect("../sqlite/measurements.db")
-        SERVER.serve_forever()
-    except KeyboardInterrupt:
-        pass
-    finally:
-        print "Exiting..."
-        DB_CONNECTION.close()
-        SERVER.socket.close()
-        SERVER.shutdown()
+    signal.signal(signal.SIGINT, _end_program)
+    signal.signal(signal.SIGTERM, _end_program)
+
+    SERVER.serve_forever()
+

@@ -39,6 +39,7 @@ AP:
   * https://learn.adafruit.com/setting-up-a-raspberry-pi-as-a-wifi-access-point/install-software
   * met 1 correctie: https://unix.stackexchange.com/a/218695
 
+Voeg "export PYTHONPATH=${HOME}/lib" toe in ~/.profile
 
 
 

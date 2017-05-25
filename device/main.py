@@ -100,6 +100,8 @@ def monitor_processes(processes):
                     print str(started_process)+ " was not restarted because number \
 of restarts exceeds the threshold"
                     processes.remove(started_process)
+        if not processes:
+            raise Exception("No more processes to monitor")
         time.sleep(2)
 
 def stop_alive_processes(processes):
@@ -129,12 +131,6 @@ def define_signal_handler():
 if __name__ == '__main__':
     STARTED_PROCESSES = []
     define_signal_handler()
-    try:
-        STARTED_PROCESSES.extend(start_processes(glob.glob("./publishers/*.py")))
-        STARTED_PROCESSES.extend(start_processes(glob.glob("./subscribers/*.py")))
-
-        monitor_processes(STARTED_PROCESSES)
-    except KeyboardInterrupt:
-        pass
-    finally:
-        stop_alive_processes(STARTED_PROCESSES)
+    STARTED_PROCESSES.extend(start_processes(glob.glob("./publishers/*.py")))
+    STARTED_PROCESSES.extend(start_processes(glob.glob("./subscribers/*.py")))
+    monitor_processes(STARTED_PROCESSES)
