@@ -1,6 +1,12 @@
 """ Common constants
 """
 import os
+import logging
+
+LOGGING_FORMAT = '%(asctime)s - %(levelname)-8s %(name)s - %(message)s'
+LOGGING_LEVEL = logging.DEBUG
+
+PROCESS_MONITORING_INTERVAL = 2
 
 GPIO_PIN_BUTTON_1 = 17
 GPIO_PIN_LED_1 = 18
