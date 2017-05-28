@@ -27,7 +27,7 @@ if __name__ == "__main__":
             """
             if self._is_stopped:
                 LOGGER.debug("Starting web server - %s", self.program)
-                self._process = subprocess.Popen(['python', self.program])
+                self._process = subprocess.Popen(['python2', self.program])
 
         def stop(self):
             """ Stop the server
@@ -74,6 +74,12 @@ if __name__ == "__main__":
         except Exception:
             LOGGER.error('Exception occurred when trying to close mqtt client', exc__info=True)
 
+        try:
+            SERVER_PROCESS.stop()
+        except Exception:
+            LOGGER.error('Exception occurred when trying to shutdown server', exc__info=True)
+
+        LOGGER.info("Done")
         exit(exit_code)
 
     LOGGER.info("Starting program")

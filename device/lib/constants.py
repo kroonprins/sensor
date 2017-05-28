@@ -4,8 +4,10 @@ import os
 import logging
 
 LOGGING_FORMAT = '%(asctime)s - %(levelname)-8s %(name)s - %(message)s'
-LOGGING_LEVEL = logging.DEBUG
+LOGGING_LEVEL = logging.DEBUG if 'APPLICATION_LOG_LEVEL' not in os.environ \
+                              else int(os.environ['APPLICATION_LOG_LEVEL'])
 
+ROOT_DIR = os.environ['HOME']
 PROCESS_MONITORING_INTERVAL = 2
 
 GPIO_PIN_BUTTON_1 = 17
@@ -25,10 +27,10 @@ TEMPERATURE_MESSAGE_TYPE = "TEMPERATURE"
 
 DEFAULT_INTERVAL = 3600
 
-SQLITE_DATABASE = os.environ['HOME']+"/sqlite/measurements.db"
+SQLITE_DATABASE = ROOT_DIR+"/sqlite/measurements.db"
 TABLE_MEASUREMENTS = "measurement"
 TABLE_PROPERTIES = "properties"
 
-WEB_SERVER_PROGRAM = os.environ['HOME']+"/web_server/main.py"
+WEB_SERVER_PROGRAM = ROOT_DIR+"/web_server/main.py"
 WEB_SERVER_PORT = 8080
 

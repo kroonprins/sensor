@@ -252,6 +252,7 @@ if __name__ == "__main__":
         except Exception:
             LOGGER.error('Exception occurred when trying to close server socket', exc__info=True)
 
+        LOGGER.info("Done")
         exit(exit_code)
 
     LOGGER.info("Starting program")

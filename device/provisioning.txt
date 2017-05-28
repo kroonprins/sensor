@@ -41,7 +41,9 @@ AP:
 
 Voeg "export PYTHONPATH=${HOME}/lib" toe in ~/.profile
 
-
+Add startup:
+  * sudo crontab -e
+  * 
 
 wit-grijs: achter-4 => midden
 zwart: voor-3 => links

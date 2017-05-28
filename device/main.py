@@ -7,7 +7,7 @@ import signal
 import subprocess
 import time
 from constants import LOGGING_FORMAT, LOGGING_LEVEL, \
-                      PROCESS_MONITORING_INTERVAL
+                      ROOT_DIR, PROCESS_MONITORING_INTERVAL
 
 logging.basicConfig(format=LOGGING_FORMAT, level=LOGGING_LEVEL)
 LOGGER = logging.getLogger('main')
@@ -52,7 +52,7 @@ if __name__ == '__main__':
         def _start(self):
             """ Start the process after construction
             """
-            return subprocess.Popen(['python', self.program])
+            return subprocess.Popen(['python2', self.program])
 
         def restart(self):
             """ Restart the process
@@ -124,6 +124,8 @@ if __name__ == '__main__':
             if not started_process.is_stopped():
                 LOGGER.info("Shutting down process %s", started_process)
                 started_process.terminate()
+            else:
+                LOGGER.debug("Process %s is already stopped", started_process)
 
     def _end_program(signum, frame):
         LOGGER.debug("Received termination signal %i", signum)
@@ -135,6 +137,8 @@ if __name__ == '__main__':
         else:
             LOGGER.info("Exiting normally")
         _stop_alive_processes(STARTED_PROCESSES)
+
+        LOGGER.info("Done")
         exit(exit_code)
 
     LOGGER.info("Starting program")
@@ -145,8 +149,8 @@ if __name__ == '__main__':
     signal.signal(signal.SIGTERM, _end_program)
 
     try:
-        STARTED_PROCESSES.extend(_start_processes(glob.glob("./publishers/*.py")))
-        STARTED_PROCESSES.extend(_start_processes(glob.glob("./subscribers/*.py")))
+        STARTED_PROCESSES.extend(_start_processes(glob.glob(ROOT_DIR+"/publishers/*.py")))
+        STARTED_PROCESSES.extend(_start_processes(glob.glob(ROOT_DIR+"/subscribers/*.py")))
         LOGGER.debug("Started processes: %s", STARTED_PROCESSES)
         _monitor_processes(STARTED_PROCESSES)
     except Exception:

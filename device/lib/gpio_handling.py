@@ -3,6 +3,7 @@
 
 import logging
 import signal
+import time
 import RPi.GPIO as GPIO
 from constants import LOGGING_FORMAT, LOGGING_LEVEL
 
@@ -35,6 +36,7 @@ class GPIOinputHandler(object):
 
         GPIO.cleanup()
 
+        GPIOinputHandler.LOGGER.info("Done")
         exit(exit_code)
 
     def _event_callback(self, channel):
@@ -64,7 +66,7 @@ class GPIOinputHandler(object):
 
             GPIOinputHandler.LOGGER.debug("Start waiting for GPIO input events")
             while True:
-                input('')
+                time.sleep(1e6)
 
         except Exception:
             GPIOinputHandler.LOGGER.error("Exception occurred", exc_info=True)

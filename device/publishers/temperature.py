@@ -62,7 +62,7 @@ if __name__ == '__main__':
 
     def _on_message(client, userdata, msg):
         payload = msg.payload
-        LOGGER.debug("Receiving message on topic %s with payload %s to update checking interval", \
+        LOGGER.info("Receiving message on topic %s with payload %s to update checking interval", \
                      msg.topic, payload)
         new_interval = payload
         global INTERVAL
@@ -84,6 +84,7 @@ if __name__ == '__main__':
         except Exception:
             LOGGER.error('Exception occurred when trying to close mqtt client', exc__info=True)
 
+        LOGGER.info("Done")
         exit(exit_code)
 
     LOGGER.info("Starting program")

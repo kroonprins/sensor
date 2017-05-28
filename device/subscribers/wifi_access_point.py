@@ -1,28 +1,44 @@
-""" Toggle LED 1
+""" Start wifi access point
 """
 
 import json
 import logging
 import signal
-import RPi.GPIO as GPIO
+import subprocess
 import paho.mqtt.client as mqtt
-from gpio_handling import GPIOoutputHandler
 from constants import LOGGING_FORMAT, LOGGING_LEVEL, \
-                      MQTT_HOST, MQTT_PORT, MQTT_KEEPALIVE, \
-                      MQTT_TOPIC_GPIO_BUTTON_1, GPIO_PIN_LED_1
+                      MQTT_HOST, MQTT_PORT, MQTT_KEEPALIVE, MQTT_TOPIC_GPIO_BUTTON_1
 
 logging.basicConfig(format=LOGGING_FORMAT, level=LOGGING_LEVEL)
-LOGGER = logging.getLogger('led1')
+LOGGER = logging.getLogger('wifi_access_point')
 
-if __name__ == '__main__':
+if __name__ == "__main__":
+
+    def _start_access_point():
+        LOGGER.info("Starting up interface wlan0")
+        subprocess.Popen(['sudo', 'ifconfig', 'wlan0', 'up'])
+        LOGGER.info("Starting hostapd")
+        subprocess.Popen(['sudo', '/usr/sbin/hostapd', '-B', '/etc/hostapd/hostapd.conf'])
+        LOGGER.info("Starting dhcp server")
+        subprocess.Popen(['sudo', 'service', 'isc-dhcp-server', 'restart'])
+        LOGGER.info("Access point started")
+
+    def _stop_access_point():
+        LOGGER.info("Killing hostapd")
+        subprocess.Popen(['sudo', 'killall', 'hostapd'])
+        LOGGER.info("Stopping dhcp server")
+        subprocess.Popen(['sudo', 'service', 'isc-dhcp-server', 'stop'])
+        LOGGER.info("Shutting down interface wlan0")
+        subprocess.Popen(['sudo', 'ifconfig', 'wlan0', 'down'])
+        LOGGER.info("Access point stopped")
+
     def _on_message(client, userdata, msg):
         payload = json.loads(msg.payload)
         LOGGER.debug("Receiving message on topic %s with payload %s", msg.topic, payload)
         if payload['status'] is True:
-            level = GPIO.HIGH
+            _start_access_point()
         else:
-            level = GPIO.LOW
-        GPIO_OUTPUT_HANDLER.set_output(level)
+            _stop_access_point()
 
     def _end_program(signum, frame):
         LOGGER.debug("Received termination signal %i", signum)
@@ -40,11 +56,6 @@ if __name__ == '__main__':
         except Exception:
             LOGGER.error('Exception occurred when trying to close mqtt client', exc__info=True)
 
-        try:
-            GPIO_OUTPUT_HANDLER.cleanup()
-        except Exception:
-            LOGGER.error('Exception occurred when trying to clean up GPIO', exc__info=True)
-
         LOGGER.info("Done")
         exit(exit_code)
 
@@ -54,9 +65,6 @@ if __name__ == '__main__':
     signal.signal(signal.SIGTERM, _end_program)
 
     try:
-        LOGGER.debug("Creating GPIO output handler")
-        GPIO_OUTPUT_HANDLER = GPIOoutputHandler(GPIO_PIN_LED_1)
-
         LOGGER.debug("Creating mqtt client for host %s and port %s", MQTT_HOST, MQTT_PORT)
         MQTT_CLIENT = mqtt.Client()
         MQTT_CLIENT.on_message = _on_message
@@ -68,4 +76,3 @@ if __name__ == '__main__':
     except Exception:
         LOGGER.error("Exception occurred", exc_info=True)
         _exit_program(1)
-
