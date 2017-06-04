@@ -43,9 +43,10 @@ class HttpHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                                self.command, \
                                self.path)
         configuration = self.REQUEST_MAPPING[self.command][self.path]
+
+        content_type = configuration['content_type']
+        response_code = 200
         try:
-            content_type = configuration['content_type']
-            response_code = 200
             body = configuration['method'](self)
         except Exception:
             LOGGER.error("An error occurred creating body for method %s", \
@@ -71,14 +72,14 @@ class HttpHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         self._do_request()
 
     def do_GET(self):
-        """ Dispatch HTTP POST requests
+        """ Dispatch HTTP GET requests
         """
         self._do_request()
 
     def ping(self):
         """ Ping response to see if the server is up. Responds the device id.
         """
-        self.wfile.write(DEVICE_ID)
+        return DEVICE_ID
 
     def count(self):
         """ Return the number of measurements that have not yet been sent.

@@ -42,8 +42,8 @@ AP:
 Voeg "export PYTHONPATH=${HOME}/lib" toe in ~/.profile
 
 Add startup:
-  * sudo crontab -e
-  * 
+  * crontab -e (voor pi user!)
+  * >> @reboot /home/pi/startup.sh
 
 wit-grijs: achter-4 => midden
 zwart: voor-3 => links
