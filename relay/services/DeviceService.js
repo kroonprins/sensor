@@ -16,7 +16,7 @@ class DeviceServiceImpl {
             offlineCallback();
           }
         }).catch((error) => {
-          console.error("Error polling device "+error);
+          console.info("Error polling device "+error);
           offlineCallback();
         })
       };      
@@ -45,15 +45,30 @@ class DeviceServiceImpl {
     });
   };
   downloadMeasurements() {
-    /*return fetch('http://10.0.2.2:8111').then((response) => {
+    return fetch(DEVICE_HOST + "/measurements", {
+      method: "POST",
+      headers: {
+        'Accept': 'application/text',
+        'Content-Type': 'application/json'
+      },
+      body: "{}"
+    }).then((response) => {
+      console.info("in then "+JSON.stringify(response))
       if(response.ok) {
+        console.info("Response download: "+JSON.stringify(response))
         return response.text();
       } else {
-        return "failed";
+        console.info("throwing")
+        throw new Error("Download measurements returned with response code "+response)
       }
-    });*/
-    let mockResult = "1#1494894419#28.312$1#1494894435#28.312$1#1494894451#28.312$";
-    return new Promise.resolve(this._parseDownloadedMeasurements(mockResult));
+    }).then((responseBody) => {
+      console.info("Second then: "+responseBody)
+      return this._parseDownloadedMeasurements(responseBody);
+    }).catch((error) => {
+      console.error("Error downloading measurements "+error);
+    });
+    /*let mockResult = "1#1494894419#28.312$1#1494894435#28.312$1#1494894451#28.312$";
+    return new Promise.resolve(this._parseDownloadedMeasurements(mockResult));*/
   };
 
   _parseDownloadedMeasurements(asString) {
@@ -70,7 +85,7 @@ class DeviceServiceImpl {
       }
     }
     return result;
-  }
+  };
 };
 
 export let DeviceService = new DeviceServiceImpl();

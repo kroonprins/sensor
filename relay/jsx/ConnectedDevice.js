@@ -15,7 +15,7 @@ export const ConnectedDevice = (props) => {
             <Text>Download</Text>
           </TouchableHighlight>
         }
-        {props.device.pendingMeasurements > 0 &&
+        {props.uploadPossible && (props.device.pendingMeasurements > 0) &&
           <TouchableHighlight onPress={props.uploadClickHandler}>
             <Text>Upload</Text>
           </TouchableHighlight>

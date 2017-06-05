@@ -1,5 +1,4 @@
 import store from 'react-native-simple-store';
-// TODO use react-native-sqlite-storage because the above is too simple 
 
 const DEVICES_TABLE = "devices";
 const MEASUREMENTS_TABLE = "measurements";
@@ -73,6 +72,11 @@ class DatabaseServiceImpl {
       console.warning("ERROR (3) "+error);
     });
   };
+  deleteMeasurements(deviceId) {
+    return store.delete(this._getMeasurementTable(deviceId)).then(() => {
+      return this.saveDevice(deviceId, pendingMeasurements = 0);
+    });
+  }
   _getMeasurementTable(deviceId) {
     return MEASUREMENTS_TABLE+"_"+deviceId;
   }

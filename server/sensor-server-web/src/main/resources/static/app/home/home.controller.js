@@ -12,7 +12,7 @@
 
         const TYPE = "TEMPERATURE";
 
-        SensorService.byDevice('1zc', TYPE).then(function (data) {
+        SensorService.byDevice('000000007d8a3464', TYPE).then(function (data) {
             vm.sensorData = data;
             vm.labels = [];
             var data1 = [];

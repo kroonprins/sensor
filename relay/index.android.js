@@ -9,13 +9,15 @@ import {
 } from 'react-native';
 import { NetworkStatusService } from './services/NetworkStatusService.js';
 import { DeviceService } from './services/DeviceService.js';
+import { UploadServerService } from './services/UploadServerService.js';
 import { DatabaseService } from './services/DatabaseService.js';
 
 import { NetworkStatus } from './jsx/NetworkStatus.js';
 import { ConnectedDevice } from './jsx/ConnectedDevice.js';
 import { KnownDevice } from './jsx/KnownDevice.js';
+import { UploadServer } from './jsx/UploadServer.js';
 
-import { IN_EMULATOR, NETWORK_POLLING_INTERVAL, DEVICE_POLLING_INTERVAL } from './constants.js';
+import { IN_EMULATOR, NETWORK_POLLING_INTERVAL, DEVICE_POLLING_INTERVAL, UPLOAD_SERVER_POLLING_INTERVAL } from './constants.js';
 
 export default class RelayApp extends Component {
   state = {
@@ -32,7 +34,10 @@ export default class RelayApp extends Component {
     // True if a connected device was found.
     deviceConnected: false,
     // if deviceConnected is true then this contains the index in the list knownDevices of the connected device.
-    connectedDeviceIdx: -1
+    connectedDeviceIdx: -1,
+
+    // Upload server found
+    uploadServerAvailable: false
   };
   componentDidMount() {
     console.info("component did mount")
@@ -42,7 +47,7 @@ export default class RelayApp extends Component {
   initializeNetworkMonitoring = () => {
     console.info("start network monitoring")
     NetworkStatusService.monitor((status) => {
-      console.info("Network status: "+JSON.stringify(status))
+      console.info("Network status: "+JSON.stringify(status)+" vs existing: "+JSON.stringify(this.state))
       if(status.wifiConnected === this.state.wifiConnected && status.networkConnected === this.state.networkConnected) {
         console.info("no change in network state")
         return;
@@ -70,6 +75,17 @@ export default class RelayApp extends Component {
           }
         }      
       }
+
+      // Network connection
+      if(!this.state.networkConnected && status.networkConnected) {
+        this.startServerMonitoring();
+      } else {
+        // Network disconnection
+        if(this.state.networkConnected && !status.networkConnected) {
+          this.stopServerMonitoring();
+        }
+      }
+
       this.setState(status);
     }, interval = NETWORK_POLLING_INTERVAL);
   };
@@ -77,7 +93,7 @@ export default class RelayApp extends Component {
     console.info("start device monitoring "+Date.now())
     DeviceService.startPollingPing((deviceId) => {
       console.info("connected "+Date.now())
-      if(!this.state.deviceConnected || deviceId !== this.state.knownDevices[this.state.connectedDeviceIdx].id) {
+      //if(!this.state.deviceConnected || deviceId !== this.state.knownDevices[this.state.connectedDeviceIdx].id) {
         DeviceService.numberOfAvailableMeasurements().then(count => {
           let updatedKnownDevices = [];
           let connectedDeviceIdx = -1;
@@ -106,16 +122,41 @@ export default class RelayApp extends Component {
           });  
           DatabaseService.saveDevice(deviceId, updatedKnownDevices[connectedDeviceIdx].pendingMeasurements);        
         });
-      }
+      //}
     }, () => {
       console.info("disconnected "+Date.now())
       this.resetDeviceConnected();
     }, DEVICE_POLLING_INTERVAL);
-  }
+  };
   stopDeviceMonitoring = () => {
     console.info("stop device monitoring "+Date.now())
     DeviceService.stopPollingPing();
     this.resetDeviceConnected();
+  };
+  startServerMonitoring = () => {
+    UploadServerService.startPollingPing(() => {
+      console.info("Set server available "+Date.now())
+      this.updateUploadServerAvailable(true);
+    }, () => {
+      console.info("Set server not available "+Date.now())
+      this.updateUploadServerAvailable(false);
+    }, UPLOAD_SERVER_POLLING_INTERVAL);
+  };
+  stopServerMonitoring = () => {
+    UploadServerService.stopPollingPing();
+    this.updateUploadServerAvailable(false);
+  };
+  updateUploadServerAvailable = (isAvailable) => {
+    if(this.state.uploadServerAvailable === isAvailable) {
+      return;
+    }
+    this.setState((prevState) => { 
+      return {
+        uploadServerAvailable: isAvailable,
+        // Needed so that the list of known devices gets re-rendered...
+        knownDevices: [...prevState.knownDevices]
+      };
+    });    
   }
   initializeKnownDevices = () => {
     DatabaseService.listDevices().then((devices) => {
@@ -145,7 +186,7 @@ export default class RelayApp extends Component {
       DatabaseService.saveMeasurements(this.state.knownDevices[this.state.connectedDeviceIdx].id, measurements).then((pendingMeasurements) => {
         let updatedKnownDevices = this.state.knownDevices.map((device, idx) => {
           if(idx === this.state.connectedDeviceIdx) {
-            return Object.assign({}, device, { pendingMeasurements: pendingMeasurements });
+            return Object.assign({}, device, { pendingMeasurements: pendingMeasurements, availableMeasurements: 0 });
           } else {
             return device;
           }
@@ -159,7 +200,20 @@ export default class RelayApp extends Component {
     });   
   };
   uploadMeasurements = (device) => {
-    console.warn("Uploading measurements but nothing implemented yet "+device.id);
+    DatabaseService.retrieveMeasurements(device.id).then((measurements) => {
+      UploadServerService.uploadMeasurements(device.id, measurements).then(_ => {
+        DatabaseService.deleteMeasurements(device.id).then(() => {
+          let updatedKnownDevices = this.state.knownDevices.map((knownDevice) => {
+            if(knownDevice.id === device.id) {
+              return Object.assign({}, knownDevice, { pendingMeasurements: 0 });
+            } else {
+              return knownDevice;
+            }
+          });  
+          this.setState({ knownDevices: updatedKnownDevices });
+        });
+      });
+    });    
   };
   renderKnownDevices = ({item}) => {
     if(!this.state.knownDevices[this.state.connectedDeviceIdx]
@@ -167,6 +221,7 @@ export default class RelayApp extends Component {
       return (
         <KnownDevice
           device={item}
+          uploadPossible={this.state.uploadServerAvailable}
           uploadClickHandler={() => this.uploadMeasurements(item)}
         />
       );
@@ -180,10 +235,12 @@ export default class RelayApp extends Component {
           wifiStatus={this.state.wifiConnected}
           networkStatus={this.state.networkConnected}
         />
+        <UploadServer status={this.state.uploadServerAvailable} />
         <ConnectedDevice
           status={this.state.deviceConnected}
           device={this.state.knownDevices[this.state.connectedDeviceIdx]}
           downloadClickHandler={this.downloadMeasurements}
+          uploadPossible={this.state.uploadServerAvailable}
           uploadClickHandler={() => this.uploadMeasurements(this.state.knownDevices[this.state.connectedDeviceIdx])}
         />
         <FlatList 
