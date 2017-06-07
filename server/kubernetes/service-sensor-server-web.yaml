@@ -1,0 +1,13 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: sensor-server-web
+spec:
+  selector:
+    name:  sensor-server-web
+  type:  NodePort
+  ports:
+  - port:  8081
+    targetPort:  8081
+    protocol: TCP
+    nodePort: 30002

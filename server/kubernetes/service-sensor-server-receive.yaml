@@ -1,0 +1,13 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: sensor-server-receive
+spec:
+  selector:
+    name:  sensor-server-receive
+  type:  NodePort
+  ports:
+  - port:  8080
+    targetPort:  8080
+    protocol: TCP
+    nodePort: 30001

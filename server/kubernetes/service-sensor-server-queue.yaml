@@ -1,0 +1,12 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: sensor-server-queue
+spec:
+  selector:
+    name:  sensor-server-queue
+  type:  ClusterIP
+  ports:
+  - port:  61616
+    targetPort:  61616
+    protocol: TCP
