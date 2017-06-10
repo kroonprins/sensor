@@ -14,14 +14,12 @@
 
         SensorService.byDevice('000000007d8a3464', TYPE).then(function (data) {
             vm.sensorData = data;
-            vm.labels = [];
-            var data1 = [];
+            var points = [];
             angular.forEach(data, function (value) {
-                vm.labels.push(value.timing);
-                data1.push(value.value);
+            	points.push({ x: value.timing, y: value.value });
             });
 
-            vm.data = [ data1 ];
+            vm.data = [ points ];
         });
 
         vm.showDialog = function ($event) {
@@ -29,24 +27,20 @@
             $mdDialog.show(dialog);
         }
 
-
-        //vm.labels = ["January", "February", "March", "April", "May", "June", "July"];
         vm.series = [TYPE];
-        /*vm.data = [
-            [65, 59, 80, 81, 56, 55, 40]
-        ];*/
-        //vm.datasetOverride = [{ yAxisID: 'y-axis-1' }];
         vm.options = {
-            /*scales: {
-                yAxes: [
-                    {
-                        id: 'y-axis-1',
-                        type: 'linear',
-                        display: true,
-                        position: 'left'
+            scales: {
+                xAxes: [{
+                    type: 'time',
+                    time: {
+                        displayFormats: {
+                        	second: 'HH:mm:ss',
+                        	minute: 'HH:mm:ss'
+                        },
+                    	parser: "YYYY-MM-DD[T]HH:mm:ss[.SSSZ]"
                     }
-                ]
-            }*/
+                }]
+            }
         };
     }
 })();
