@@ -25,4 +25,4 @@ nbdist/
 
 logs/
 
-src/main/resources/static/libs/
+src/main/resources/static/sensor/libs/

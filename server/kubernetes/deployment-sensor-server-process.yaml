@@ -7,49 +7,23 @@ metadata:
 spec:
   replicas: 1
   strategy:
-    rollingUpdate:
-      maxSurge: 1
-      maxUnavailable: 1
-    type: RollingUpdate
+    type: Recreate
   template:
     metadata:
       labels:
         name: sensor-server-process
     spec:
       containers:
-      - image:  index.docker.io/kroonprins/sensor-server-process
-        name: sensor-server-process
-        # resources:
-        #   requests:
-        #     cpu: "20m"
-        #     memory: "55M"
-        # livenessProbe:
-        #   httpGet:
-        #     path: /_status/healthz
-        #     port: 5000
-        #   initialDelaySeconds: 90
-        #   timeoutSeconds: 10
-        # readinessProbe:
-        #   httpGet:
-        #     path: /_status/healthz
-        #     port: 5000
-        #   initialDelaySeconds: 30
-        #   timeoutSeconds: 10
-        env:
-        - name:  SPRING_DATASOURCE_URL
-          value:  jdbc:mysql://sensor-server-db:3306/sensor_data
-        - name:  SPRING_DATASOURCE_USERNAME
-          value:  mysql
-        - name:  SPRING_DATASOURCE_PASSWORD
-          value:  mysql                
-        #ports:
-        #- containerPort:  8080
-          #name: sensor-server-process
-        volumeMounts:
-        - mountPath: /data
-          name: data
-        imagePullPolicy: Always
-      volumes:
-        - name: data
-          emptyDir: {}
-      restartPolicy: Always
+        - image:  index.docker.io/kroonprins/sensor-server-process
+          name: sensor-server-process
+          env:
+            - name:  SPRING_DATASOURCE_URL
+              value:  jdbc:mysql://sensor-server-db:3306/sensor_data
+            - name:  SPRING_DATASOURCE_USERNAME
+              value:  mysql
+            - name:  SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-user
+                  key: password
+          imagePullPolicy: Always

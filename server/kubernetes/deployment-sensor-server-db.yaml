@@ -14,43 +14,34 @@ spec:
         name: sensor-server-db
     spec:
       containers:
-      - resources:
-          limits :
-            cpu: 0.5      
-        image:  mysql:8
-        name: sensor-server-db
-        # resources:
-        #   requests:
-        #     cpu: "20m"
-        #     memory: "55M"
-        # livenessProbe:
-        #   httpGet:
-        #     path: /_status/healthz
-        #     port: 5000
-        #   initialDelaySeconds: 90
-        #   timeoutSeconds: 10
-        # readinessProbe:
-        #   httpGet:
-        #     path: /_status/healthz
-        #     port: 5000
-        #   initialDelaySeconds: 30
-        #   timeoutSeconds: 10
-        env:
-        - name:  MYSQL_ROOT_PASSWORD
-          value:  root
-        - name:  MYSQL_DATABASE
-          value:  sensor_data
-        - name:  MYSQL_USER
-          value:  mysql
-        - name:  MYSQL_PASSWORD
-          value:  mysql
-        ports:
-        - containerPort:  3306
-        volumeMounts:
-        - mountPath: /data
-          name: data
-        imagePullPolicy: Always
+        - image:  mysql
+          name: sensor-server-db
+          args:
+            - "--ignore-db-dir=lost+found" #note this property didn't work on mysql 8 => now using 5.7.x version of mysql         
+          env:
+            - name:  MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-root
+                  key: password
+            - name:  MYSQL_DATABASE
+              value:  sensor_data
+            - name:  MYSQL_USER
+              value:  mysql
+            - name:  MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-user
+                  key: password
+          ports:
+            - containerPort:  3306
+          volumeMounts:
+            - name: mysql-persistent-storage
+              mountPath: /var/lib/mysql
+          imagePullPolicy: Always
       volumes:
-        - name: data
-          emptyDir: {}
-      restartPolicy: Always
+        - name: mysql-persistent-storage
+          gcePersistentDisk:
+            pdName: mysql-disk
+            fsType: ext4
+      
