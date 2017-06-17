@@ -51,7 +51,7 @@ class DeviceServiceImpl {
         'Accept': 'application/text',
         'Content-Type': 'application/json'
       },
-      body: "{}"
+      body: JSON.stringify({ timing: (new Date()).toISOString() })
     }).then((response) => {
       console.info("in then "+JSON.stringify(response))
       if(response.ok) {
@@ -67,8 +67,6 @@ class DeviceServiceImpl {
     }).catch((error) => {
       console.error("Error downloading measurements "+error);
     });
-    /*let mockResult = "1#1494894419#28.312$1#1494894435#28.312$1#1494894451#28.312$";
-    return new Promise.resolve(this._parseDownloadedMeasurements(mockResult));*/
   };
 
   _parseDownloadedMeasurements(asString) {

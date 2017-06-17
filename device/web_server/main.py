@@ -1,12 +1,14 @@
 """ Serve measurements via HTTP reading from sqlite database
 """
 
+from datetime import datetime
 import json
 import logging
 import signal
 import sqlite3
 import BaseHTTPServer
 import paho.mqtt.client as mqtt
+import iso8601
 from device_info import get_device_id
 from constants import LOGGING_FORMAT, LOGGING_LEVEL, \
                       WEB_SERVER_PORT, \
@@ -34,8 +36,15 @@ class HttpHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         self.send_header("Content-type", content_type)
         self.end_headers()
 
+    def _read_body(self):
+        content_length = int(self.headers.getheader('content-length', 0))
+        return self.rfile.read(content_length)
+
     def _write_body(self, body):
         self.wfile.write(body)
+
+    def _timedelta_to_seconds(self, delta):
+        return 86400*delta.days + delta.seconds
 
     def _do_request(self):
         LOGGER.info("Handling request for client %s: %s %s", \
@@ -48,13 +57,15 @@ class HttpHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         response_code = 200
         try:
             body = configuration['method'](self)
-        except Exception:
+        except Exception as exc:
             LOGGER.error("An error occurred creating body for method %s", \
                                            str(configuration['method']), \
                                            exc_info=True)
             content_type = "application/test"
             response_code = 500
             body = "Internal server error"
+            if exc.message:
+                body += " ("+exc.message+")"
 
         LOGGER.debug("Creating response: HTTP/%s - %s - %s", \
                            response_code, \
@@ -117,12 +128,33 @@ class HttpHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         except Exception:
             raise
 
+    def retrieve_time(self):
+        """ Retrieve the time of the device
+        """
+        try:
+            return datetime.utcnow().replace(microsecond=0).isoformat()
+        except Exception:
+            raise
+
     def send_measurements(self):
         """ Send the measurements and update the database to indicate that they have been sent.
         """
-        content_length = int(self.headers.getheader('content-length', 0))
-        body = json.loads(self.rfile.read(content_length))
+        body = json.loads(self._read_body())
         LOGGER.debug("Received body: %s", body)
+
+        # apply a time skew on the measurements: in input we receive the time of the caller
+        # which we assume is the correct time. Difference between this time and the machine
+        # time is calculated and applied on each measurement.
+        if not 'timing' in body:
+            raise Exception("Timing missing in input")
+        timing = body['timing']
+        correct_timing = iso8601.parse(timing).replace(tzinfo=None)
+        device_timing = datetime.utcnow()
+        if correct_timing > device_timing:
+            timeskew = self._timedelta_to_seconds(correct_timing - device_timing)
+        else:
+            timeskew = -1*self._timedelta_to_seconds(device_timing - correct_timing)
+        LOGGER.debug("Timeskew: %d (%s, %s)", timeskew, str(correct_timing), str(device_timing))
 
         try:
             cursor = DATABASE_CONNECTION.cursor()
@@ -143,8 +175,8 @@ class HttpHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
             DATABASE_CONNECTION.commit()
 
-            select_query = "select type||'#'||timing||'#'||value||'$' from "+ \
-                                         TABLE_MEASUREMENTS+" where status='2'"
+            select_query = "select type||'#'||(timing + ("+str(timeskew)+"))||'#'||value||'$' "+ \
+                                " from "+TABLE_MEASUREMENTS+" where status='2'"
             if limit_by_type:
                 select_query += " and type=?"
             result = ""
@@ -153,7 +185,8 @@ class HttpHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 result += measurement[0]
 
             update_final_status_query = "update "+TABLE_MEASUREMENTS+ \
-                                     " set status='5' where status='2'"
+                                     " set status='5', timing=(timing + ("+str(timeskew)+"))" \
+                                     " where status='2'"
             if limit_by_type:
                 update_final_status_query += " and type=?"
             LOGGER.debug("Executing query [%s][%s]", update_final_status_query, params)
@@ -172,8 +205,7 @@ class HttpHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     def update_properties(self):
         """ Retrieve the properties from the database
         """
-        content_length = int(self.headers.getheader('content-length', 0))
-        body = json.loads(self.rfile.read(content_length))
+        body = json.loads(self._read_body())
         LOGGER.debug("Received body: [%s]", body)
 
         columns = []
@@ -210,6 +242,10 @@ class HttpHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             '/properties': {
                 'method': retrieve_properties,
                 'content_type': 'application/json'
+            },
+            '/time': {
+                'method': retrieve_time,
+                'content_type': 'application/text'
             }
         },
         'POST': {
